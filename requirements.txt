@@ -1,0 +1,13 @@
+streamlit
+openai-whisper
+transformers
+torch
+accelerate
+sentence-transformers
+faiss-cpu
+pypdf
+pyttsx3
+xgboost
+scikit-learn
+joblib
+numpy
