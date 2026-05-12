@@ -2,8 +2,6 @@
 
 A locally-running, voice-powered medical assistant built with Python and Streamlit. Speak to it — it listens, understands, and responds. Capable of diagnosing heart disease risk using a trained XGBoost model and answering general medical queries using PDF-based RAG (Retrieval Augmented Generation).
 
-> **Final Project — Data Mining | FAST NUCES Lahore**
-> M. Azib Naeem (23L-2541) · Ahmad Bin Tariq (23L-2510) · Awais Bin Abbas (23L-2574)
 
 ---
 
