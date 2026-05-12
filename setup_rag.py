@@ -57,7 +57,7 @@ def build_index():
     with open(f"{STORE_DIR}/chunks.pkl", "wb") as f:
         pickle.dump(chunks, f)
 
-    print(f"✅ Done! Indexed {len(chunks)} chunks.")
+    print(f"Done! Indexed {len(chunks)} chunks.")
 
 
 if __name__ == "__main__":
