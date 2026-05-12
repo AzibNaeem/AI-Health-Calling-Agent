@@ -14,15 +14,25 @@ st.title("🏥 Medical Voice Assistant")
 
 st.markdown("""
 <style>
+/* Hide the playback bar inside the mic widget */
 [data-testid="stAudioInput"] audio { display: none !important; }
+/* Hide the response audio player visually — audio still plays */
+[data-testid="stAudio"] {
+    visibility: hidden !important;
+    height: 0 !important;
+    min-height: 0 !important;
+    margin: 0 !important;
+    padding: 0 !important;
+    overflow: hidden !important;
+}
 </style>
 """, unsafe_allow_html=True)
 
-# Initialize session state
+# ── Session state ─────────────────────────────────────────────────────────────
 if "messages" not in st.session_state:
     st.session_state.messages = []
 if "mode" not in st.session_state:
-    st.session_state.mode = "idle"  # 'idle' or 'collecting'
+    st.session_state.mode = "idle"
 if "collected" not in st.session_state:
     st.session_state.collected = {}
 if "last_audio_hash" not in st.session_state:
@@ -30,24 +40,23 @@ if "last_audio_hash" not in st.session_state:
 if "pending_audio" not in st.session_state:
     st.session_state.pending_audio = None
 
-# Show chat history
+# ── Chat history ──────────────────────────────────────────────────────────────
 for msg in st.session_state.messages:
     with st.chat_message(msg["role"]):
         st.write(msg["content"])
 
-# Play the assistant's response audio from the previous turn
+# ── Play response audio (invisible player, audio still plays) ─────────────────
 if st.session_state.pending_audio:
     st.audio(st.session_state.pending_audio, autoplay=True)
     st.session_state.pending_audio = None
 
-# Audio recorder
+# ── Mic — always available ────────────────────────────────────────────────────
 audio_file = st.audio_input("🎤 Press to speak")
 
 if audio_file is not None:
     audio_bytes = audio_file.getbuffer().tobytes()
     audio_hash = hashlib.md5(audio_bytes).hexdigest()
 
-    # Only process if this is a new recording
     if audio_hash != st.session_state.last_audio_hash:
         st.session_state.last_audio_hash = audio_hash
 
@@ -56,7 +65,6 @@ if audio_file is not None:
         user_text = transcribe("temp_audio.wav")
         st.session_state.messages.append({"role": "user", "content": user_text})
 
-        # Branch on mode
         if st.session_state.mode == "collecting":
             current_idx = len(st.session_state.collected)
             feature = FEATURES[current_idx]
@@ -77,7 +85,6 @@ if audio_file is not None:
                     st.session_state.collected = {}
                 else:
                     response = get_next_question(st.session_state.collected)
-
         else:
             intent = classify_intent(user_text)
             if intent == "heart_diagnosis":

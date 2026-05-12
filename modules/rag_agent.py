@@ -6,10 +6,6 @@ from sentence_transformers import SentenceTransformer
 from modules.llm import chat
 
 STORE_DIR = "rag/vectorstore"
-# L2 distance threshold — below this means the chunk is relevant to the query.
-# With normalized sentence-transformer embeddings, distances range 0-2.
-# 1.0 ≈ cosine similarity of 0.5, a reasonable relevance cutoff.
-RELEVANCE_THRESHOLD = 1.0
 
 print("Loading embedder...")
 embedder = SentenceTransformer("all-MiniLM-L6-v2")
@@ -28,35 +24,38 @@ def load_vectorstore():
     return _index, _chunks
 
 
-def retrieve(query, k=3):
+def retrieve(query, k=5):
     index, chunks = load_vectorstore()
     query_vec = embedder.encode([query])
     distances, indices = index.search(np.array(query_vec), k)
-    return [chunks[i] for i in indices[0]], distances[0]
+    return [chunks[i] for i in indices[0]]
 
 
 def answer_query(query):
     if not os.path.exists(f"{STORE_DIR}/index.faiss"):
         return _general_answer(query)
 
-    relevant_chunks, distances = retrieve(query, k=3)
+    relevant_chunks = retrieve(query, k=5)
+    context = "\n\n".join(relevant_chunks)
 
-    if distances[0] <= RELEVANCE_THRESHOLD:
-        context = "\n\n".join(relevant_chunks)
-        messages = [
-            {
-                "role": "system",
-                "content": (
-                    "You are a helpful medical assistant. Answer the user's question "
-                    "using the context below. Be concise and clear.\n\n"
-                    f"CONTEXT:\n{context}"
-                )
-            },
-            {"role": "user", "content": query}
-        ]
-        return chat(messages, max_tokens=200)
-
-    return _general_answer(query)
+    messages = [
+        {
+            "role": "system",
+            "content": (
+                "You are a helpful medical assistant. You have access to a knowledge base "
+                "of doctors, hospitals, and medical information shown in the CONTEXT below.\n\n"
+                "Rules:\n"
+                "- If the CONTEXT contains relevant information (e.g. doctor names, hospitals, "
+                "specialties), use it to answer directly and specifically.\n"
+                "- If the CONTEXT does not cover the question, answer using your general "
+                "medical knowledge.\n"
+                "- Always be concise and practical.\n\n"
+                f"CONTEXT:\n{context}"
+            )
+        },
+        {"role": "user", "content": query}
+    ]
+    return chat(messages, max_tokens=200)
 
 
 def _general_answer(query):
