@@ -1,5 +1,5 @@
 # 🏥 HealthCare AI Calling Assistant
-
+ 
 A locally-running, voice-powered medical assistant built with Python and Streamlit. Speak to it — it listens, understands, and responds. Capable of diagnosing heart disease risk using a trained XGBoost model and answering general medical queries using PDF-based RAG (Retrieval Augmented Generation).
 
 
