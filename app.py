@@ -40,6 +40,16 @@ if "last_audio_hash" not in st.session_state:
 if "pending_audio" not in st.session_state:
     st.session_state.pending_audio = None
 
+# ── Sidebar: reset button ─────────────────────────────────────────────────────
+with st.sidebar:
+    if st.button("🗑️ Reset Chat", use_container_width=True):
+        st.session_state.messages = []
+        st.session_state.mode = "idle"
+        st.session_state.collected = {}
+        st.session_state.last_audio_hash = None
+        st.session_state.pending_audio = None
+        st.rerun()
+
 # ── Chat history ──────────────────────────────────────────────────────────────
 for msg in st.session_state.messages:
     with st.chat_message(msg["role"]):
